@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edgar Salazar - Cybersecurity</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <style>
+        /* --- Paleta de Colores --- */
+        :root {
+            --scene-bg: #2c1e3a;
+            --ui-bg: #5d6d7e;
+            --dialog-bg: #e0d6a8;
+            --dialog-text: #312a2a;
+            --verb-selected: #ff3399;
+            --accent-cyan: #00f4f7;
+            --pixel-size: 3px;
+        }
+
+        /* --- Estilos Generales --- */
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden; /* Evita el scroll, es una pantalla de juego */
+        }
+        
+        body {
+            background-color: #000;
+            color: white;
+            font-family: 'VT323', monospace;
+            font-size: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- Estructura del Juego --- */
+        #game-screen {
+            flex-grow: 1;
+            background-color: var(--scene-bg);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #dialog-box {
+            background-color: var(--dialog-bg);
+            color: var(--dialog-text);
+            border: var(--pixel-size) solid var(--accent-cyan);
+            padding: 1rem;
+            box-shadow: 0 0 15px var(--accent-cyan);
+            flex-grow: 1;
+            overflow-y: auto; /* Scroll si el contenido es largo */
+        }
+        
+        #ui-bar {
+            background-color: var(--ui-bg);
+            padding: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: stretch; /* Estira los hijos para que tengan la misma altura */
+            flex-shrink: 0;
+            border-top: var(--pixel-size) solid #fff;
+        }
+        
+        #verb-bar, #inventory-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        /* --- Verbos de Acción --- */
+        .verb {
+            background-color: #333;
+            color: var(--accent-cyan);
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border: var(--pixel-size) solid #444;
+            border-bottom-color: #222;
+            border-right-color: #222;
+        }
+        .verb.selected, .verb:hover {
+            background-color: var(--verb-selected);
+            color: #fff;
+        }
+
+        /* --- Contenido de la Caja de Diálogo --- */
+        .content-section {
+            display: none; /* Oculto por defecto */
+        }
+        .content-section.active {
+            display: block; /* Visible cuando está activo */
+        }
+        
+        /* Perfil de Usuario */
+        .profile {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            align-items: flex-start;
+        }
+        .profile-pic-container {
+            border: var(--pixel-size) solid var(--dialog-text);
+            padding: 0.5rem;
+            background: #c7bda2;
+            flex-shrink: 0;
+        }
+        .profile-pic {
+            width: 150px;
+            height: 225px;
+            image-rendering: pixelated;
+            display: block;
+        }
+        .profile-bio {
+            flex-grow: 1;
+            min-width: 300px;
+        }
+        .profile-bio h1 {
+            margin: 0 0 1rem 0;
+            font-size: 2rem;
+        }
+
+        /* Listas de Proyectos/Ponencias */
+        .item-list ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .item-list li {
+            margin-bottom: 1.5rem;
+            padding-left: 1rem;
+            border-left: var(--pixel-size) solid var(--verb-selected);
+        }
+        .item-list h3 {
+            margin: 0 0 0.25rem 0;
+        }
+        .item-list p {
+            margin: 0;
+            font-size: 0.9em;
+        }
+        .item-list a {
+            color: var(--verb-selected);
+            font-weight: bold;
+        }
+
+        /* Inventario */
+        #inventory-bar a {
+            padding: 0.5rem;
+            color: white;
+            text-decoration: none;
+            background: #4a5764;
+        }
+         #inventory-bar a:hover {
+             background: var(--accent-cyan);
+             color: #000;
+         }
+
+    </style>
+</head>
+<body>
+
+    <main id="game-screen">
+        <div id="dialog-box">
+            <div id="content-profile" class="content-section active">
+                <div class="profile">
+                    <div class="profile-pic-container">
+                        <img src="https://i.imgur.com/gQksxhW.jpeg" alt="Foto 8-bit de Edgar Salazar" class="profile-pic">                      
+                    </div>
+                    <div class="profile-bio">
+                        <h1>Edgar Salazar</h1>
+                        <p>Especialista en seguridad ofensiva. Si tiene un bug, es un reto. Si es "seguro", es una invitación.</p>
+                        <p>Me dedico a explorar sistemas, encontrar fallos de seguridad y reportarlos antes de que se conviertan en el problema de alguien. Es como un point-and-click, pero los puzzles son aplicaciones y los objetos son exploits.</p>
+                        <h3>Resumen</h3>
+                        <p>Mis padres, como buenos visionarios digitales de los 90 (aunque sin saberlo), decidieron que lo mejor para mí y mis hermanos era meternos en cursos de computación... ¡a los 6 años! Ahí, entre teclas ruidosas y monitores CRT, conocí algo llamado MS-DOS, y poco después el mágico mundo de Windows 3.1. Así llegó la primera PC a casa, una máquina compartida que se convirtió en nuestro pasa tiempo… y también en nuestro campo de batalla. Entre juegos, formateos accidentales y reparaciones improvisadas, empecé a disfrutar no solo de jugar, sino también de romper cosas... y luego arreglarlas. Era nuestra manera de aprender, curiosidad, error, caos familiar y reinicio.</p>
+                        
+                        <p>Si, fui parte de esa generación que creció necesitando un crack.exe para que un juego arrancara y viví la emoción del dial-up como quien esperaba señales del más allá...</p>
+                        <p>En 2006, una materia en la universidad llamada "Auditoría de Sistemas" cambió el rumbo y en 2007 armé mi propio laboratorio de pruebas de seguridad: una PC vieja, Windows Server 2003 (pirata, por supuesto), y muchas ganas de aprender rompiendo cosas. Otra vez.</p>
+                        <p>En 2008 tomé una decisión dura: vendí mi bajo Epiphone modelo Les Paul de 5 cuerdas (sí, era hermoso) para pagar mi primer curso de Especialización en Seguridad Informática con ITelligence Security. Desde ese momento, ha sido un viaje de ida. </p>
+                        <p>Desde 2009 a 2021 co-lidere el capitulo de <a href="https://owasp.org/" target="_blank" title="OWASP">OWASP</a> Venezuela, lo que me permitió relacionarme y colaborar con una comunidad increible de profesionales.</p>
+                        <p>Desde 2014 trabajo en <a href="https://pyxis.tech/" target="_blank" title="Pyxis">Pyxis</a>. Lo que comenzó como un esfuerzo por contagiar la pasión por la ciberseguridad, hoy se transformó en un equipo especializado que brinda servicios para varios clientes.</p>                      
+                        <h3>Emprendimientos</h3>
+                        <ul>
+                          <li>Pragmatic Consultores (RIP)</li>
+                          <li>Buho Security (RIP)</li>
+                          <li><a href="https://www.guayoyo.io/" target="_blank" title="Guayoyo">Guayoyo</a></li>
+                        </ul>
+                        <h3>Otras cosas</h3>
+                        <ul>
+                          <li>Me siguen gustando los juegos, en especial los de point-and-click, mi consola actual es Nintendo Switch</li>
+                          <li>Retome la patineta, actualmente veo clases de Longboard y Surfskate con <a href="https://www.instagram.com/laescuelita.uy/" target="_blank" title="La Escuelita">La Escuelita</a> </li>
+                          <li>Con respecto al arte, intento aprender el Cuatro Venezolano (Soy conocido por tocar el cuatro en los cumpleaños) y Pintar sobre lienzo con oleo, pintura acrílica, acuarela y creyones</li>
+                        </ul>
+                        
+                    </div>
+                </div>
+            </div>
+
+            <div id="content-projects" class="content-section item-list">
+                <h2>// ARCHIVOS: Proyectos</h2>
+                <ul>
+                    <li>
+                        <h3>AttackerKB - Contributions</h3>
+                        <p>Aquí podés encontrar algunas de mis contribuciones… A veces investigo por curiosidad. A veces por obsesión. Pero casi siempre porque no puedo dejar pasar un comportamiento raro sin entender qué lo causa.</p>
+                        <p><a href="https://attackerkb.com/contributors/3dcyber" target="_blank">>> Ver en AttackerKB</a></p>
+                    </li>
+                     <li>
+                        <h3>Exploits Collection - Offensive Security Research</h3>
+                        <p>Este repositorio contiene una colección de exploits desarrollados desde cero o modificados por mi a partir de versiones públicas, destinados a estudiar, probar y mejorar las técnicas de seguridad ofensiva.</p>
+                        <p><a href="https://github.com/3dcyber/Exploits" target="_blank">>> Ver en GitHub</a></p>
+                    </li>
+                    <li>
+                        <h3>Nmap script to check vulnerability CVE-2021-21972</h3>
+                        <p>Un script nmap para validar vulnerabilidad RCE CVE-2021-21972 en VMware vCenter Server.</p>
+                        <p><a href="https://github.com/GuayoyoCyber/CVE-2021-21972" target="_blank">>> Ver en GitHub</a></p>
+                    </li>
+                    <li>
+                        <h3>Nmap script to check vulnerability CVE-2021-21975</h3>
+                        <p>Un script nmap para validar vulnerabilidad SSRF CVE-2021-21975 en VMware vRealize Operations Manager.</p>
+                        <p><a href="https://github.com/GuayoyoCyber/CVE-2021-21975" target="_blank">>> Ver en GitHub</a></p>
+                    </li>
+                      <li>
+                        <h3>Nmap script to check vulnerability CVE-2024-24919</h3>
+                        <p>Un script nmap para validar vulnerabilidad de divulgacion de informacion CVE-2024-24919 en Check Point Security Gateways.</p>
+                        <p><a href="https://github.com/GuayoyoCyber/CVE-2024-24919" target="_blank">>> Ver en GitHub</a></p>
+                    </li>
+                </ul>
+            </div>
+
+            <div id="content-talks" class="content-section item-list">
+                <h2>// REGISTROS: Entrenamientos y Ponencias</h2>
+                <ul>
+                    <li>
+                        <h3>"Respuesta a incidentes de ransomware"</h3>
+                        <p>Cybersecurity Summer Bootcamp - 2024</p>
+                        <p>OEA / Incibe</p>
+                        <p><a href="https://x.com/GuayoyoCyber/status/1813957162143728096" target="_blank">>> Ver resumen</a></p>
+                    </li>
+                     <li>
+                        <h3>"Detección de Amenazas y Respuesta Activa - ICS & Malware"</h3>
+                        <p>XVII Jornadas STIC CCN-CERT | V Jornadas de Ciberdefensa ESPDEF-CERT  - 2023</p>
+                        <p>CCN-CERT</p>
+                        <p><a href="https://x.com/GuayoyoCyber/status/1731716662498414660" target="_blank">>> Ver resumen</a></p>
+                    </li>
+                    <li>
+                        <h3>"Detección de Amenazas y Respuesta Activa a Ciberataques"</h3>
+                        <p> CSIRT Americas Ecuador- 2023</p>
+                        <p>OEA</p>
+                        <p><a href="https://x.com/GuayoyoCyber/status/1724104160415453625" target="_blank">>> Ver resumen</a></p>
+                    </li>
+                    <li>
+                        <h3>"CyberOps - Análisis, detección y respuesta de Malware"</h3>
+                        <p>Cybersecurity Summer Bootcamp - 2022</p>
+                        <p>OEA / Incibe</p>
+                        <p><a href="https://x.com/GuayoyoCyber/status/1549076033994899457" target="_blank">>> Ver resumen</a></p>
+                    </li>
+                    <li>
+                        <h3>"(In)seguridad en Sistemas de Control Industrial"</h3>
+                        <p>CharruaCON - 2017</p>
+                        <p>CharruaCON</p>
+                        <p><a href="https://x.com/GuayoyoCyber/status/863033436990316544" target="_blank">>> Ver resumen</a></p>
+                    </li>
+                   
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <footer id="ui-bar">
+        <div id="verb-bar">
+            <div class="verb" onclick="selectVerb('Look at')">Look at</div>
+            <div class="verb" onclick="selectVerb('Use')">Use</div>
+            <div class="verb" onclick="selectVerb('Talk to')">Talk to</div>
+        </div>
+        <div id="inventory-bar">
+            <a href="https://x.com/3ddavid" target="_blank" title="X">X</a>
+            <a href="https://medium.com/@3ddavid" target="_blank" title="Medium">Medium</a>
+            <a href="https://www.linkedin.com/in/eddavid/" target="_blank" title="LinkedIn">LinkedIn</a>
+            <a href="https://github.com/3dcyber" target="_blank" title="GitHub">GitHub</a>
+        </div>
+    </footer>
+
+    <script>
+        let selectedVerb = 'Look at'; // Verbo inicial
+
+        const verbToObjectMap = {
+            'Look at': 'profile',
+            'Use': 'projects',
+            'Talk to': 'talks'
+        };
+
+        function selectVerb(verb) {
+            // Actualiza el verbo seleccionado visualmente
+            document.querySelectorAll('.verb').forEach(v => v.classList.remove('selected'));
+            const verbElement = Array.from(document.querySelectorAll('.verb')).find(el => el.textContent === verb);
+            if (verbElement) {
+                verbElement.classList.add('selected');
+            }
+            
+            selectedVerb = verb;
+            
+            // Muestra el contenido correspondiente al verbo
+            const targetObjectId = verbToObjectMap[selectedVerb];
+            showContent(targetObjectId);
+        }
+        
+        function showContent(contentId) {
+            // Oculta todas las secciones
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Muestra la sección correcta
+            const sectionToShow = document.getElementById(`content-${contentId}`);
+            if (sectionToShow) {
+                sectionToShow.classList.add('active');
+            }
+        }
+        
+        // Simula el primer clic al cargar la página
+        document.addEventListener('DOMContentLoaded', () => {
+            selectVerb('Look at');
+        });
+        
+        
+        // Que haces mirando por aqui? Busca trabajo ocioso! xD 
+    </script>
+    
+    
+
+</body>
+</html>
